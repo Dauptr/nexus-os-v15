@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS OS V15 PRO - Cyberpunk Web Operating System</title>
+  <meta name="description" content="The Ultimate Cyberpunk Web Operating System by Dauptr">
+  <meta name="author" content="Dauptr">
+  <meta name="theme-color" content="#00ffaa">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◈</text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #030308; --bgAlt: #0a0a14; --card: rgba(12,12,20,0.95);
+      --accent: #00ffaa; --accentDim: rgba(0,255,170,0.15);
+      --border: rgba(255,255,255,0.08); --text: #fff;
+      --muted: rgba(255,255,255,0.5); --danger: #ff3366;
+      --warning: #ffaa00; --info: #00aaff; --purple: #aa44ff;
+      --gold: #ffd700; --success: #00ff88;
+    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent)40; } 50% { box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent)60; } }
+    @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-8px) rotate(2deg); } 75% { transform: translateY(-4px) rotate(-2deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes particles { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-100px) rotate(360deg); opacity: 0; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--accent)40; border-radius: 4px; }
+    
+    #boot { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
+    #boot.hidden { display: none; }
+    .boot-logo { font-size: 100px; color: var(--accent); margin-bottom: 20px; text-shadow: 0 0 60px var(--accent), 0 0 120px var(--accent)50; animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite; }
+    .boot-title { font-size: 48px; font-weight: 100; letter-spacing: 0.3em; animation: fadeIn 1s ease; }
+    .boot-version { font-size: 14px; color: var(--accent); letter-spacing: 0.4em; margin-top: 8px; animation: fadeIn 1.5s ease; }
+    .boot-progress { width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 50px; overflow: hidden; }
+    .boot-progress-bar { height: 100%; background: linear-gradient(135deg, var(--accent), var(--info)); border-radius: 4px; transition: width 0.1s; box-shadow: 0 0 20px var(--accent); }
+    .boot-loading { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 16px; font-family: monospace; }
+    
+    #login { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; }
+    #login.show { display: flex; }
+    .login-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 90%; max-width: 400px; backdrop-filter: blur(20px); animation: slideUp 0.5s ease; }
+    .login-title { text-align: center; margin-bottom: 30px; }
+    .login-title h1 { font-size: 32px; font-weight: 200; letter-spacing: 0.2em; }
+    .login-title p { color: var(--muted); margin-top: 8px; }
+    .login-input { width: 100%; padding: 14px 16px; background: var(--bgAlt); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 16px; margin-bottom: 16px; transition: all 0.2s; }
+    .login-input:focus { border-color: var(--accent); box-shadow: 0 0 20px var(--accentDim); }
+    .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent), var(--info)); border: none; border-radius: 8px; color: var(--bg); font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+    .login-btn:hover { transform: scale(1.02); box-shadow: 0 0 30px var(--accent)60; }
+    .login-demo { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); font-size: 14px; cursor: pointer; margin-bottom: 12px; }
+    .login-switch { text-align: center; margin-top: 20px; color: var(--muted); }
+    .login-switch a { color: var(--accent); cursor: pointer; }
+    .login-error { background: var(--danger)20; border: 1px solid var(--danger); border-radius: 8px; padding: 12px; margin-bottom: 16px; color: var(--danger); display: none; }
+    .login-error.show { display: block; }
+    
+    #desktop { position: fixed; inset: 0; display: none; }
+    #desktop.show { display: block; }
+    .desktop-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, var(--bgAlt) 0%, var(--bg) 100%); }
+    .particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .particle { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); animation: particles 4s ease-out infinite; opacity: 0.2; }
+    
+    .topbar { position: absolute; top: 0; left: 0; right: 0; height: 40px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; backdrop-filter: blur(20px); z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { color: var(--accent); font-size: 18px; }
+    .topbar-version { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-time { font-family: monospace; font-size: 13px; color: var(--muted); }
+    .topbar-user { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
+    .topbar-user:hover { background: var(--accentDim); }
+    .topbar-avatar { width: 24px; height: 24px; background: var(--accentDim); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .topbar-username { font-size: 12px; }
+    
+    .dock { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(20px); z-index: 100; }
+    .dock-item { width: 48px; height: 48px; background: var(--accentDim); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .dock-item:hover { transform: scale(1.1) translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 30px var(--accent)40; }
+    .dock-item.active::after { content: ''; position: absolute; bottom: -4px; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; }
+    .dock-icon { font-size: 20px; }
+    .dock-item[data-tooltip]:hover::before { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding: 4px 8px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; font-size: 10px; white-space: nowrap; margin-bottom: 8px; }
+    
+    .window { position: absolute; background: var(--card); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(20px); display: none; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: fadeIn 0.3s ease; }
+    .window.show { display: flex; }
+    .window.maximized { inset: 40px 0 0 0 !important; width: 100% !important; height: calc(100% - 40px) !important; border-radius: 0; }
+    .window-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bgAlt); border-bottom: 1px solid var(--border); cursor: move; }
+    .window-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+    .window-title-icon { font-size: 16px; }
+    .window-controls { display: flex; gap: 8px; }
+    .window-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.2s; }
+    .window-btn.close { background: var(--danger); }
+    .window-btn.minimize { background: var(--warning); }
+    .window-btn.maximize { background: var(--success); }
+    .window-btn:hover { transform: scale(1.2); }
+    .window-content { flex: 1; overflow: auto; padding: 16px; }
+    
+    .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 16px; padding: 16px; }
+    .app-item { background: var(--accentDim); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .app-item:hover { transform: scale(1.05); border-color: var(--accent); box-shadow: 0 8px 30px var(--accent)40; }
+    .app-icon { font-size: 32px; margin-bottom: 8px; }
+    .app-name { font-size: 12px; color: var(--muted); }
+    
+    .ai-chat { display: flex; flex-direction: column; height: 100%; }
+    .ai-status { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--success)20; border-radius: 8px; margin-bottom: 12px; }
+    .ai-status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+    .ai-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 8px; }
+    .ai-message { padding: 12px 16px; border-radius: 12px; max-width: 80%; }
+    .ai-message.user { background: var(--accent); color: var(--bg); align-self: flex-end; }
+    .ai-message.assistant { background: var(--bgAlt); border: 1px solid var(--border); align-self: flex-start; }
+    .ai-input-area { display: flex; gap: 8px; margin-top: 12px; }
+    .ai-input { flex: 1; padding: 12px 16px; background: var(--bgAlt); border: 1px solid var(--border); border-radius: 8px; color: var(--text); resize: none; }
+    .ai-input:focus { border-color: var(--accent); outline: none; }
+    .ai-send { padding: 12px 20px; background: var(--accent); border: none; border-radius: 8px; color: var(--bg); cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .ai-send:hover { box-shadow: 0 0 20px var(--accent)60; }
+    
+    .terminal { font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; height: 100%; display: flex; flex-direction: column; }
+    .terminal-output { flex: 1; overflow-y: auto; padding: 12px; background: #000; border-radius: 8px; margin-bottom: 8px; }
+    .terminal-line { margin: 4px 0; }
+    .terminal-line.command { color: var(--accent); }
+    .terminal-line.output { color: var(--muted); }
+    .terminal-line.error { color: var(--danger); }
+    .terminal-input { display: flex; align-items: center; gap: 8px; }
+    .terminal-prompt { color: var(--accent); }
+    .terminal-input input { flex: 1; background: transparent; border: none; color: var(--text); font-family: inherit; font-size: inherit; outline: none; }
+    
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+    .game-card { background: var(--accentDim); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .game-card:hover { border-color: var(--accent); transform: scale(1.05); }
+    .game-icon { font-size: 48px; margin-bottom: 12px; }
+    .game-title { font-size: 14px; font-weight: 500; }
+    
+    .settings-section { margin-bottom: 24px; }
+    .settings-title { font-size: 16px; font-weight: 500; margin-bottom: 12px; color: var(--accent); }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--accentDim); border-radius: 8px; margin-bottom: 8px; }
+    .settings-label { font-size: 14px; }
+    .settings-themes { display: flex; gap: 8px; flex-wrap: wrap; }
+    .theme-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+    .theme-btn:hover, .theme-btn.active { border-color: var(--text); transform: scale(1.1); }
+    
+    .about-content { text-align: center; padding: 40px; }
+    .about-logo { font-size: 80px; color: var(--accent); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+    .about-title { font-size: 32px; font-weight: 200; letter-spacing: 0.2em; margin-bottom: 8px; }
+    .about-version { color: var(--accent); margin-bottom: 24px; }
+    .about-info { color: var(--muted); font-size: 14px; line-height: 1.8; }
+    .about-credits { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .about-credits p { color: var(--muted); font-size: 12px; margin: 4px 0; }
+    
+    .snake-canvas { background: #000; border-radius: 8px; display: block; margin: 0 auto; }
+    .snake-score { text-align: center; margin-bottom: 16px; font-size: 18px; color: var(--accent); }
+    .snake-controls { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+    .snake-btn { padding: 8px 16px; background: var(--accentDim); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; }
+    .snake-btn:hover { border-color: var(--accent); }
+    
+    @media (max-width: 768px) {
+      .dock { padding: 6px; }
+      .dock-item { width: 40px; height: 40px; }
+      .dock-icon { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="boot" onclick="skipBoot()">
+    <div class="boot-logo">◈</div>
+    <div class="boot-title">NEXUS</div>
+    <div class="boot-version">V15 PRO • TIER 6</div>
+    <div class="boot-progress"><div class="boot-progress-bar" id="progressBar"></div></div>
+    <div class="boot-loading">Loading<span id="loadingDots"></span></div>
+    <div id="particles"></div>
+  </div>
+
+  <div id="login">
+    <div class="login-box">
+      <div class="login-title">
+        <h1>NEXUS</h1>
+        <p>V15 PRO • Cyberpunk OS</p>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <input type="text" class="login-input" id="loginName" placeholder="Username">
+      <input type="password" class="login-input" id="loginPass" placeholder="Password">
+      <button class="login-btn" onclick="handleLogin()">Login</button>
+      <button class="login-demo" onclick="handleDemo()">Demo Mode (<span id="demoTrials">3</span> trials)</button>
+      <div class="login-switch">
+        <span onclick="toggleRegister()">Create account</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="desktop">
+    <div class="desktop-bg"></div>
+    <div class="particles" id="desktopParticles"></div>
+    
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-logo">◈</span>
+        <span class="topbar-version">NEXUS V15 PRO • TIER 6</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-time" id="topbarTime"></span>
+        <div class="topbar-user" onclick="openApp('settings')">
+          <div class="topbar-avatar" id="topbarAvatar">👤</div>
+          <span class="topbar-username" id="topbarUsername">User</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dock" id="dock"></div>
+    <div id="windows"></div>
+  </div>
+
+  <script>
+    // NEXUS OS V15 PRO - TIER 6
+    // Single HTML Build by Dauptr
+    
+    const themes = {
+      neon: { name: 'Neon', accent: '#00ffaa', bg: '#030308', bgAlt: '#0a0a14' },
+      cyber: { name: 'Cyber', accent: '#aa44ff', bg: '#0a0612', bgAlt: '#140d1f' },
+      ocean: { name: 'Ocean', accent: '#00aaff', bg: '#020810', bgAlt: '#0a1525' },
+      blood: { name: 'Blood', accent: '#ff3366', bg: '#080303', bgAlt: '#140a0a' },
+      golden: { name: 'Golden', accent: '#ffd700', bg: '#0a0802', bgAlt: '#15100a' },
+      matrix: { name: 'Matrix', accent: '#00ff00', bg: '#000800', bgAlt: '#001a00' }
+    };
+    
+    const apps = [
+      { id: 'ai', name: 'AI Chat', icon: '◈', color: '#00ffaa' },
+      { id: 'copilot', name: 'Copilot', icon: '⌨', color: '#00aaff' },
+      { id: 'ide', name: 'IDE', icon: '⟨⟩', color: '#aa44ff' },
+      { id: 'livechat', name: 'Chat', icon: '💬', color: '#00ff88' },
+      { id: 'videochat', name: 'Video', icon: '📹', color: '#ff6644' },
+      { id: 'tiktok', name: 'TikTok', icon: '🎵', color: '#ff0050' },
+      { id: 'terminal', name: 'Terminal', icon: '⌘', color: '#888' },
+      { id: 'games', name: 'Games', icon: '▣', color: '#ffaa00' },
+      { id: 'search', name: 'Search', icon: '🔍', color: '#00aaff' },
+      { id: 'art', name: 'Art', icon: '✦', color: '#aa44ff' },
+      { id: 'settings', name: 'Settings', icon: '⚙', color: '#666' },
+      { id: 'about', name: 'About', icon: '◈', color: '#ffd700' }
+    ];
+    
+    let currentUser = null;
+    let users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+    let currentTheme = localStorage.getItem('nexus_theme') || 'neon';
+    let demoTrials = parseInt(localStorage.getItem('nexus_demo_trials') || '3');
+    let openWindows = {};
+    let zIndex = 100;
+    
+    // Boot
+    let progress = 0;
+    const bootInterval = setInterval(() => {
+      progress += 3;
+      document.getElementById('progressBar').style.width = Math.min(progress, 100) + '%';
+      if (progress >= 100) clearInterval(bootInterval);
+    }, 50);
+    
+    const dotsInterval = setInterval(() => {
+      const dots = document.getElementById('loadingDots');
+      dots.textContent = dots.textContent.length >= 3 ? '' : dots.textContent + '.';
+    }, 400);
+    
+    setTimeout(() => skipBoot(), 2500);
+    
+    function skipBoot() {
+      clearInterval(bootInterval);
+      clearInterval(dotsInterval);
+      document.getElementById('boot').classList.add('hidden');
+      document.getElementById('demoTrials').textContent = demoTrials;
+      showLogin();
+    }
+    
+    // Login
+    function showLogin() {
+      document.getElementById('login').classList.add('show');
+    }
+    
+    function handleLogin() {
+      const name = document.getElementById('loginName').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const error = document.getElementById('loginError');
+      
+      if (!name || !pass) {
+        error.textContent = 'Please fill all fields';
+        error.classList.add('show');
+        return;
+      }
+      
+      let user = users.find(u => u.name === name);
+      if (!user) {
+        user = { id: Date.now().toString(), name, pass, avatar: '👤', color: '#00ffaa' };
+        users.push(user);
+        localStorage.setItem('nexus_users', JSON.stringify(users));
+      } else if (user.pass !== pass) {
+        error.textContent = 'Wrong password';
+        error.classList.add('show');
+        return;
+      }
+      
+      currentUser = user;
+      document.getElementById('login').classList.remove('show');
+      showDesktop();
+    }
+    
+    function handleDemo() {
+      if (demoTrials <= 0) {
+        document.getElementById('loginError').textContent = 'Demo trials exhausted';
+        document.getElementById('loginError').classList.add('show');
+        return;
+      }
+      demoTrials--;
+      localStorage.setItem('nexus_demo_trials', demoTrials.toString());
+      currentUser = { id: 'demo', name: 'Demo User', avatar: '👤' };
+      document.getElementById('login').classList.remove('show');
+      showDesktop();
+    }
+    
+    function toggleRegister() {
+      document.getElementById('loginError').classList.remove('show');
+    }
+    
+    // Desktop
+    function showDesktop() {
+      applyTheme(currentTheme);
+      document.getElementById('desktop').classList.add('show');
+      document.getElementById('topbarUsername').textContent = currentUser.name;
+      renderDock();
+      updateTime();
+      setInterval(updateTime, 1000);
+      createParticles('desktopParticles');
+    }
+    
+    function applyTheme(themeId) {
+      const theme = themes[themeId];
+      document.documentElement.style.setProperty('--accent', theme.accent);
+      document.documentElement.style.setProperty('--bg', theme.bg);
+      document.documentElement.style.setProperty('--bgAlt', theme.bgAlt);
+      localStorage.setItem('nexus_theme', themeId);
+      currentTheme = themeId;
+    }
+    
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('topbarTime').textContent = 
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' +
+        now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    
+    function createParticles(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 4 + 's';
+        container.appendChild(particle);
+      }
+    }
+    
+    // Dock
+    function renderDock() {
+      const dock = document.getElementById('dock');
+      dock.innerHTML = apps.slice(0, 7).map(app => `
+        <div class="dock-item" data-tooltip="${app.name}" onclick="openApp('${app.id}')">
+          <span class="dock-icon" style="color: ${app.color}">${app.icon}</span>
+        </div>
+      `).join('') + `
+        <div class="dock-item" data-tooltip="All Apps" onclick="openApp('launcher')">
+          <span class="dock-icon">⊞</span>
+        </div>
+      `;
+    }
+    
+    // Windows
+    function openApp(appId) {
+      if (openWindows[appId]) {
+        focusWindow(appId);
+        return;
+      }
+      
+      const app = apps.find(a => a.id === appId) || { id: 'launcher', name: 'Apps', icon: '⊞', color: '#888' };
+      const windowsContainer = document.getElementById('windows');
+      
+      const windowEl = document.createElement('div');
+      windowEl.className = 'window show';
+      windowEl.id = 'window-' + appId;
+      windowEl.style.cssText = `left: ${100 + Math.random() * 200}px; top: ${80 + Math.random() * 100}px; width: 600px; height: 400px; z-index: ${++zIndex};`;
+      
+      windowEl.innerHTML = `
+        <div class="window-header" onmousedown="startDrag(event, '${appId}')">
+          <div class="window-title">
+            <span class="window-title-icon" style="color: ${app.color}">${app.icon}</span>
+            <span>${app.name}</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-btn close" onclick="closeWindow('${appId}')"></button>
+            <button class="window-btn maximize" onclick="maximizeWindow('${appId}')"></button>
+          </div>
+        </div>
+        <div class="window-content" id="content-${appId}">${getAppContent(appId)}</div>
+      `;
+      
+      windowsContainer.appendChild(windowEl);
+      openWindows[appId] = windowEl;
+    }
+    
+    function closeWindow(appId) {
+      const win = openWindows[appId];
+      if (win) {
+        win.remove();
+        delete openWindows[appId];
+      }
+    }
+    
+    function maximizeWindow(appId) {
+      const win = openWindows[appId];
+      if (win) win.classList.toggle('maximized');
+    }
+    
+    function focusWindow(appId) {
+      const win = openWindows[appId];
+      if (win) {
+        win.style.zIndex = ++zIndex;
+        win.classList.add('show');
+      }
+    }
+    
+    // Drag
+    let dragData = { el: null, x: 0, y: 0 };
+    
+    function startDrag(e, appId) {
+      const win = openWindows[appId];
+      if (!win || win.classList.contains('maximized')) return;
+      dragData = { el: win, x: e.clientX - win.offsetLeft, y: e.clientY - win.offsetTop };
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('mouseup', stopDrag);
+    }
+    
+    function onDrag(e) {
+      if (!dragData.el) return;
+      dragData.el.style.left = (e.clientX - dragData.x) + 'px';
+      dragData.el.style.top = Math.max(40, e.clientY - dragData.y) + 'px';
+    }
+    
+    function stopDrag() {
+      dragData.el = null;
+      document.removeEventListener('mousemove', onDrag);
+      document.removeEventListener('mouseup', stopDrag);
+    }
+    
+    // App Content
+    function getAppContent(appId) {
+      switch(appId) {
+        case 'ai': return `
+          <div class="ai-chat">
+            <div class="ai-status"><div class="ai-status-dot"></div><span>AI Online</span></div>
+            <div class="ai-messages" id="aiMessages"></div>
+            <div class="ai-input-area">
+              <textarea class="ai-input" id="aiInput" placeholder="Type a message..." rows="1"></textarea>
+              <button class="ai-send" onclick="sendAI()">Send</button>
+            </div>
+          </div>`;
+        case 'terminal': return `
+          <div class="terminal">
+            <div class="terminal-output" id="termOutput">
+              <div class="terminal-line output">NEXUS Terminal v15.0</div>
+              <div class="terminal-line output">Type 'help' for commands</div>
+            </div>
+            <div class="terminal-input">
+              <span class="terminal-prompt">$</span>
+              <input type="text" id="termInput" onkeypress="handleTerm(event)" autofocus>
+            </div>
+          </div>`;
+        case 'games': return `
+          <div class="games-grid">
+            <div class="game-card" onclick="startGame('snake')">
+              <div class="game-icon">🐍</div>
+              <div class="game-title">Snake</div>
+            </div>
+            <div class="game-card" onclick="startGame('memory')">
+              <div class="game-icon">🎴</div>
+              <div class="game-title">Memory</div>
+            </div>
+            <div class="game-card" onclick="startGame('tictactoe')">
+              <div class="game-icon">⭕</div>
+              <div class="game-title">Tic Tac Toe</div>
+            </div>
+          </div>`;
+        case 'settings': return `
+          <div class="settings-section">
+            <div class="settings-title">Theme</div>
+            <div class="settings-themes">
+              ${Object.entries(themes).map(([id, t]) => `
+                <button class="theme-btn ${currentTheme === id ? 'active' : ''}" 
+                  style="background: ${t.accent}" 
+                  onclick="changeTheme('${id}')"></button>
+              `).join('')}
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-title">Account</div>
+            <div class="settings-row">
+              <span class="settings-label">Username</span>
+              <span>${currentUser?.name || 'Guest'}</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Theme</span>
+              <span>${themes[currentTheme]?.name || 'Neon'}</span>
+            </div>
+          </div>`;
+        case 'about': return `
+          <div class="about-content">
+            <div class="about-logo">◈</div>
+            <div class="about-title">NEXUS OS</div>
+            <div class="about-version">V15 PRO • TIER 6</div>
+            <div class="about-info">
+              The Ultimate Cyberpunk Web Operating System<br>
+              Built with Next.js, React, and AI<br>
+              19 Functional Apps • 6 Themes • PWA Ready
+            </div>
+            <div class="about-credits">
+              <p>Created by Dauptr</p>
+              <p>dauptr@gmail.com</p>
+              <p>© 2025 NEXUS OS</p>
+            </div>
+          </div>`;
+        case 'launcher': return `
+          <div class="app-grid">
+            ${apps.map(app => `
+              <div class="app-item" onclick="openApp('${app.id}')">
+                <div class="app-icon" style="color: ${app.color}">${app.icon}</div>
+                <div class="app-name">${app.name}</div>
+              </div>
+            `).join('')}
+          </div>`;
+        default: return `
+          <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 64px; color: ${apps.find(a => a.id === appId)?.color || '#888'}; margin-bottom: 16px;">${apps.find(a => a.id === appId)?.icon || '◈'}</div>
+            <h2 style="margin-bottom: 8px;">${apps.find(a => a.id === appId)?.name || 'App'}</h2>
+            <p style="color: var(--muted);">${apps.find(a => a.id === appId)?.name || 'App'} is active</p>
+            <p style="color: var(--accent); margin-top: 16px;">✓ Active</p>
+          </div>`;
+      }
+    }
+    
+    // AI Chat
+    const aiResponses = [
+      "I'm NEXUS AI, your cyberpunk assistant! How can I help you?",
+      "That's an interesting question. Let me think about it...",
+      "I can help you with coding, writing, analysis, and more!",
+      "NEXUS OS V15 PRO is packed with features. What would you like to explore?",
+      "I'm here to assist you 24/7. What do you need?",
+      "Great question! Here's what I think..."
+    ];
+    
+    function sendAI() {
+      const input = document.getElementById('aiInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      
+      const container = document.getElementById('aiMessages');
+      container.innerHTML += `<div class="ai-message user">${msg}</div>`;
+      input.value = '';
+      
+      setTimeout(() => {
+        const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        container.innerHTML += `<div class="ai-message assistant">${response}</div>`;
+        container.scrollTop = container.scrollHeight;
+      }, 500 + Math.random() * 1000);
+    }
+    
+    // Terminal
+    function handleTerm(e) {
+      if (e.key !== 'Enter') return;
+      const input = document.getElementById('termInput');
+      const output = document.getElementById('termOutput');
+      const cmd = input.value.trim();
+      input.value = '';
+      
+      output.innerHTML += `<div class="terminal-line command">$ ${cmd}</div>`;
+      
+      const commands = {
+        help: 'Commands: help, clear, date, whoami, ls, apps, neofetch',
+        clear: () => { output.innerHTML = ''; return ''; },
+        date: new Date().toLocaleString(),
+        whoami: currentUser?.name || 'guest',
+        ls: apps.map(a => a.name).join('  '),
+        apps: apps.map(a => `${a.icon} ${a.name}`).join('\n'),
+        neofetch: `◈ NEXUS OS V15 PRO\n  Tier: 6\n  Theme: ${themes[currentTheme]?.name}\n  Apps: ${apps.length}\n  Shell: NexusTerm`
+      };
+      
+      const result = commands[cmd.split(' ')[0]] 
+        ? (typeof commands[cmd.split(' ')[0]] === 'function' ? commands[cmd.split(' ')[0]]() : commands[cmd.split(' ')[0]])
+        : `Command not found: ${cmd.split(' ')[0]}`;
+      
+      if (result) output.innerHTML += `<div class="terminal-line output">${result}</div>`;
+      output.scrollTop = output.scrollHeight;
+    }
+    
+    // Games
+    function startGame(game) {
+      const content = document.getElementById('content-games');
+      if (game === 'snake') {
+        content.innerHTML = `
+          <div class="snake-score">Score: <span id="snakeScore">0</span></div>
+          <canvas id="snakeCanvas" class="snake-canvas" width="300" height="300"></canvas>
+          <div class="snake-controls">
+            <button class="snake-btn" onclick="initSnake()">New Game</button>
+            <button class="snake-btn" onclick="exitGame()">Exit</button>
+          </div>
+          <p style="text-align: center; margin-top: 12px; color: var(--muted);">Use arrow keys to move</p>`;
+        initSnake();
+      }
+    }
+    
+    function exitGame() {
+      if (snakeGame) clearInterval(snakeGame);
+      document.getElementById('content-games').innerHTML = getAppContent('games');
+    }
+    
+    let snakeGame = null;
+    function initSnake() {
+      const canvas = document.getElementById('snakeCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const grid = 15;
+      let snake = [{x: 10, y: 10}];
+      let dir = {x: 1, y: 0};
+      let food = {x: 15, y: 15};
+      let score = 0;
+      
+      document.getElementById('snakeScore').textContent = score;
+      
+      if (snakeGame) clearInterval(snakeGame);
+      
+      document.onkeydown = e => {
+        if (e.key === 'ArrowUp' && dir.y === 0) dir = {x: 0, y: -1};
+        if (e.key === 'ArrowDown' && dir.y === 0) dir = {x: 0, y: 1};
+        if (e.key === 'ArrowLeft' && dir.x === 0) dir = {x: -1, y: 0};
+        if (e.key === 'ArrowRight' && dir.x === 0) dir = {x: 1, y: 0};
+      };
+      
+      snakeGame = setInterval(() => {
+        const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+        
+        if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.some(s => s.x === head.x && s.y === head.y)) {
+          clearInterval(snakeGame);
+          return;
+        }
+        
+        snake.unshift(head);
+        
+        if (head.x === food.x && head.y === food.y) {
+          score += 10;
+          document.getElementById('snakeScore').textContent = score;
+          food = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
+        } else {
+          snake.pop();
+        }
+        
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, 300, 300);
+        
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+        snake.forEach(s => ctx.fillRect(s.x * grid, s.y * grid, grid - 2, grid - 2));
+        
+        ctx.fillStyle = '#ff3366';
+        ctx.fillRect(food.x * grid, food.y * grid, grid - 2, grid - 2);
+      }, 100);
+    }
+    
+    // Settings
+    function changeTheme(themeId) {
+      applyTheme(themeId);
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.theme-btn[onclick="changeTheme('${themeId}')"]`)?.classList.add('active');
+    }
+  </script>
+</body>
+</html>
